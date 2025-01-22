@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8081:8080" # Expose Kafka UI on localhost:8081
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      - kafka
+
+  cert-trans-worker:
+    build:
+      context: .
+      dockerfile: certificateTransparencyWorker/Dockerfile
+    container_name: cert-trans-worker
+    environment:
+      - SHARED_CONFIG_LOCATION=/config/shared-local.yml
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    volumes:
+      - ./config:/config
+    depends_on:
+      - kafka
+
+  enum-req-pub:
+    build:
+      context: .
+      dockerfile: enumerationRequestPublisher/Dockerfile
+    container_name: enum-req-pub
+    environment:
+      - SHARED_CONFIG_LOCATION=/config/shared-local.yml
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/config
+    depends_on:
+      - kafka
