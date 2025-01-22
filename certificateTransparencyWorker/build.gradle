@@ -25,6 +25,10 @@ repositories {
     }
 }
 
+tasks.withType(Test) {
+    environment "SHARED_CONFIG_LOCATION", "$projectDir/../config/shared-local.yml"
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.kafka:spring-kafka'
