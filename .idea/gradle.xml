@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/LinkFinderWorker" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/LinkFinderWorker" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/certificateTransparencyWorker" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/certificateTransparencyWorker" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/crtshClient" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/crtshClient" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/enumerationRequestPublisher" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/enumerationRequestPublisher" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/getJsWorker" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/getJsWorker" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

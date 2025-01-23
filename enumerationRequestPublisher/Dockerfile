@@ -13,7 +13,7 @@ COPY enumerationRequestPublisher/build/libs/*.jar app.jar
 COPY config /config
 
 # Set environment variable to reference the shared config location
-ENV SHARED_CONFIG_LOCATION=/config/shared-local.yml
+ENV SHARED_CONFIG_LOCATION=/config/shared-container.yml
 
 # Expose the port your app runs on
 EXPOSE 8080

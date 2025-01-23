@@ -13,7 +13,7 @@ COPY certificateTransparencyWorker/build/libs/*.jar app.jar
 COPY config /config
 
 # Set environment variable to reference the shared config location
-ENV SHARED_CONFIG_LOCATION=/config/shared-local.yml
+ENV SHARED_CONFIG_LOCATION=/config/shared-container.yml
 
 # Run the Spring Boot application
 ENTRYPOINT ["java", "-jar", "app.jar"]

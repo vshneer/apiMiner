@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="cert-trans-worker" target="21" />
+      <module name="cert-trans-worker.integrationTest" target="21" />
+      <module name="cert-trans-worker.main" target="21" />
+      <module name="cert-trans-worker.native-test" target="21" />
+      <module name="cert-trans-worker.quarkus-generated-sources" target="21" />
+      <module name="cert-trans-worker.quarkus-test-generated-sources" target="21" />
+      <module name="cert-trans-worker.test" target="21" />
+      <module name="crt-sg-client" target="21" />
+      <module name="crt-sg-client.main" target="21" />
+      <module name="crt-sg-client.test" target="21" />
+      <module name="crtshClient" target="21" />
+      <module name="crtshClient.main" target="21" />
+      <module name="crtshClient.test" target="21" />
+      <module name="dbwriter" target="21" />
+      <module name="dbwriter.main" target="21" />
+      <module name="dbwriter.test" target="21" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

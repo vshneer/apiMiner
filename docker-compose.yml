@@ -39,7 +39,33 @@ services:
       dockerfile: certificateTransparencyWorker/Dockerfile
     container_name: cert-trans-worker
     environment:
-      - SHARED_CONFIG_LOCATION=/config/shared-local.yml
+      - SHARED_CONFIG_LOCATION=/config/shared-container.yml
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    volumes:
+      - ./config:/config
+    depends_on:
+      - kafka
+
+  get-js-worker:
+    build:
+      context: .
+      dockerfile: getJsWorker/Dockerfile
+    container_name: get-js-worker
+    environment:
+      - SHARED_CONFIG_LOCATION=/config/shared-container.yml
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    volumes:
+      - ./config:/config
+    depends_on:
+      - kafka
+
+  link-finder-worker:
+    build:
+      context: .
+      dockerfile: LinkFinderWorker/Dockerfile
+    container_name: link-finder-worker
+    environment:
+      - SHARED_CONFIG_LOCATION=/config/shared-container.yml
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     volumes:
       - ./config:/config
@@ -52,7 +78,7 @@ services:
       dockerfile: enumerationRequestPublisher/Dockerfile
     container_name: enum-req-pub
     environment:
-      - SHARED_CONFIG_LOCATION=/config/shared-local.yml
+      - SHARED_CONFIG_LOCATION=/config/shared-container.yml
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     ports:
       - "8080:8080"

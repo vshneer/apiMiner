@@ -1,6 +1,6 @@
 # Shared settings for local environment
 kafka:
-  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
   topics:
     api: api
     js: js
