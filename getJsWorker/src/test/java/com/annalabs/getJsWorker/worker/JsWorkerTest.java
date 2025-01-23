@@ -35,7 +35,7 @@ class JsWorkerTest {
 
     @Test
     void jsWorkerTest() throws InterruptedException {
-        jsWorker.processMessage("fnx.co.il");
+        jsWorker.processMessage("owasp.org");
         boolean messageConsumed = latch.await(2, TimeUnit.SECONDS);
         assertTrue(messageConsumed, "Message was not consumed in time");
 
