@@ -1,6 +1,6 @@
 package com.annalabs.enumerationRequestPublisher.request;
 
-import com.annalabs.enumerationRequestPublisher.entity.ScopeEntity;
+import com.annalabs.common.entity.ScopeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

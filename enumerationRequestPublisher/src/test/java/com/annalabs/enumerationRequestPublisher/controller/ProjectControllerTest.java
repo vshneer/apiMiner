@@ -1,8 +1,8 @@
 package com.annalabs.enumerationRequestPublisher.controller;
 
+import com.annalabs.common.entity.ScopeEntity;
 import com.annalabs.common.kafka.KafkaMessage;
-import com.annalabs.enumerationRequestPublisher.entity.ProjectEntity;
-import com.annalabs.enumerationRequestPublisher.entity.ScopeEntity;
+import com.annalabs.common.entity.ProjectEntity;
 import com.annalabs.enumerationRequestPublisher.request.PostProjectRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
