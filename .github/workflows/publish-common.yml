@@ -3,7 +3,7 @@ name: Publish Common to GitHub Packages
 on:
   push:
     branches:
-      - develop
+      - main
     paths:
       - 'common/**'  # Only trigger when changes are made inside the 'common' directory
   workflow_dispatch: # Allows manual trigger
