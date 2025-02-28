@@ -5,7 +5,9 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "Project")
+import static com.annalabs.common.constant.Collection.projectCollection;
+
+@Document(collection = projectCollection)
 @Getter
 @Setter
 public class ProjectEntity {
