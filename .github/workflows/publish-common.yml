@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - develop
+    paths:
+      - 'common/**'  # Only trigger when changes are made inside the 'common' directory
   workflow_dispatch: # Allows manual trigger
 
 jobs:
@@ -24,7 +26,7 @@ jobs:
           cache: 'gradle'
 
       - name: Grant Execute Permission to Gradlew
-        run: chmod +x ./gradlew
+        run: chmod +x ./common/gradlew
 
       - name: Publish to GitHub Packages
         env:
