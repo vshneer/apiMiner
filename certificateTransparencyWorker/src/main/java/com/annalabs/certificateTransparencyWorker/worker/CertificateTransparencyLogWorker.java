@@ -1,36 +1,34 @@
 package com.annalabs.certificateTransparencyWorker.worker;
 
 import com.annalabs.certificateTransparencyWorker.client.CrtShClient;
+import com.annalabs.common.kafka.KafkaMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Objects;
-import java.util.Set;
 
 @Component
 public class CertificateTransparencyLogWorker {
 
+
     @Autowired
     CrtShClient crtShClient;
-
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
-
+    private KafkaTemplate<String, KafkaMessage> kafkaTemplate;
     @Value("${kafka.topics.subdomain}")
     private String topic;
 
-    public void work(String message) {
-        Set<String> subdomains = null;
-        try {
-            subdomains = crtShClient.getSubdomains(message);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (!Objects.isNull(subdomains)) {
-            subdomains.forEach(subdomain -> kafkaTemplate.send(topic, subdomain));
-        }
+    public void work(String projectId, String domain) throws IOException {
+        crtShClient.getSubdomains(domain)
+                .forEach(subdomain ->
+                        kafkaTemplate.send(
+                                topic,
+                                new KafkaMessage(
+                                        projectId,
+                                        subdomain,
+                                        "CertificateTransparencyLogWorker")));
+
     }
 }
