@@ -28,6 +28,11 @@ jobs:
       - name: Grant Execute Permission to Gradlew
         run: chmod +x ./common/gradlew
 
+      - name: Debug Environment Variables
+        run: |
+          echo "GitHub Actor: $GITHUB_ACTOR"
+          echo "GitHub Token length: ${#GITHUB_PAT}"
+
       - name: Publish to GitHub Packages
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
