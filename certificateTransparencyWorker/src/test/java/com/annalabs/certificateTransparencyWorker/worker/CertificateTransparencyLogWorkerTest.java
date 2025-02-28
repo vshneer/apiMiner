@@ -1,5 +1,6 @@
 package com.annalabs.certificateTransparencyWorker.worker;
 
+import com.annalabs.common.kafka.KafkaMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,6 +10,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +30,7 @@ class CertificateTransparencyLogWorkerTest {
     private final CountDownLatch latch = new CountDownLatch(1);
     @Autowired
     CertificateTransparencyLogWorker certificateTransparencyLogWorker;
-    private String receivedMessage;
+    private KafkaMessage receivedMessage;
 
     @DynamicPropertySource
     static void registerKafkaProperties(DynamicPropertyRegistry registry) {
@@ -36,8 +38,13 @@ class CertificateTransparencyLogWorkerTest {
     }
 
     @Test
-    void workerPublishesToKafka() throws InterruptedException {
-        certificateTransparencyLogWorker.work(TEST_D);
+    void workerPublishesToKafka() throws InterruptedException, IOException {
+        /*
+            If worker gets domain
+            It produces a message to Kafka
+            With subdomains
+         */
+        certificateTransparencyLogWorker.work("", TEST_D);
         // Wait for the message to be consumed
         boolean messageConsumed = latch.await(2, TimeUnit.SECONDS);
         // Verify the received message
@@ -45,7 +52,7 @@ class CertificateTransparencyLogWorkerTest {
     }
 
     @KafkaListener(topics = {"${kafka.topics.subdomain}"}, groupId = "${kafka.groups.certsh}")
-    public void listen(String message) {
+    public void listen(KafkaMessage message) {
         this.receivedMessage = message;
         latch.countDown();
     }
