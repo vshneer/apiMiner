@@ -1,4 +1,4 @@
-package com.annalabs.enumerationRequestPublisher.entity;
+package com.annalabs.common.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
