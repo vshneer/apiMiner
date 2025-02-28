@@ -1,11 +1,13 @@
 package com.annalabs.enumerationRequestPublisher.controller;
 
 
-import com.annalabs.enumerationRequestPublisher.request.LaunchEnumerationRequest;
+import com.annalabs.common.kafka.KafkaMessage;
+import com.annalabs.enumerationRequestPublisher.entity.ProjectEntity;
+import com.annalabs.enumerationRequestPublisher.request.PostProjectRequest;
+import com.annalabs.enumerationRequestPublisher.response.PostProjectResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,22 +16,34 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
-public class LaunchSubDomainEnumerationController {
+public class ProjectController {
 
-    @Value("${kafka.topics.domain}")
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Value("${kafka.topics.project}")
     private String topic;
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, KafkaMessage> kafkaTemplate;
 
-    @PostMapping("/launchEnumeration")
-    public ResponseEntity<String> launchEnumeration(@RequestBody LaunchEnumerationRequest launchEnumerationRequest) {
+    @PostMapping("/project")
+    public PostProjectResponse createProject(@RequestBody PostProjectRequest postProjectRequest) {
+        // TODO make MONGO + KAFKA transactions atomic
         try {
-            kafkaTemplate.send(topic, launchEnumerationRequest.getDomain());
-            return new ResponseEntity<>("Published to Kafka", HttpStatus.OK);
+            // Create a Project document
+            ProjectEntity project = new ProjectEntity(postProjectRequest.getTitle(), postProjectRequest.getScope());
+
+            // Save it in MongoDB
+            ProjectEntity savedProject = mongoTemplate.save(project);
+
+            // Send the new document's ID to Kafka
+            kafkaTemplate.send(topic, new KafkaMessage(savedProject.getId(),"", "createProject"));
+
+            return new PostProjectResponse(savedProject.getId());
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>("Failed to publish to Kafka", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new PostProjectResponse(null);
         }
     }
 
