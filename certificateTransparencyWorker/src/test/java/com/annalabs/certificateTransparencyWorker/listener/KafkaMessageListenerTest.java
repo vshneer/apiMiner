@@ -9,9 +9,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -39,17 +45,26 @@ public class KafkaMessageListenerTest {
     }
 
     @Autowired
+    private KafkaMessageListener listener; // ✅ Spring-managed instance
+
+    @Autowired
+    private CertificateTransparencyLogWorker worker;
+
+    @TestConfiguration
+    static class MockConfig {
+        @Bean
+        @Primary
+        public CertificateTransparencyLogWorker mockWorker() {
+            return mock(CertificateTransparencyLogWorker.class);
+        }
+    }
+
+    @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
     private KafkaTemplate<String, KafkaMessage> kafkaTemplate;
     @Value("${kafka.topics.project}")
     private String topic;
-
-    @Mock
-    CertificateTransparencyLogWorker worker;
-
-    @InjectMocks
-    KafkaMessageListener listener;
 
     @DynamicPropertySource
     static void registerKafkaProperties(DynamicPropertyRegistry registry) {
@@ -58,25 +73,32 @@ public class KafkaMessageListenerTest {
 
     public void populateMongoWithNewProject() {
         // Create a Project document
-        ProjectEntity project = new ProjectEntity("test-title", new ScopeEntity(List.of(TEST_IN_SCOPE), List.of()));
+        ProjectEntity project = new ProjectEntity("test-title", new ScopeEntity(List.of(), List.of(TEST_IN_SCOPE)));
         // Save it in MongoDB
         mongoTemplate.save(project);
     }
+
+    @BeforeEach
+    public void checkMocks() {
+        System.out.println("🔍 Worker is: " + worker);
+        System.out.println("🔍 Worker is a mock? " + (Mockito.mockingDetails(worker).isMock()));
+    }
+
 
     @Test
     public void listen() throws IOException {
         /*
             If Listener gets kafka message
             It calls worker with smth
-            TODO fix the test
          */
+
+        // when message is consumed
         imitateWorkOfProjectCreatorService();
-        Awaitility.await()
-                .atMost(10, TimeUnit.SECONDS)
-                .untilAsserted(() -> {
-                    // ✅ Verify that worker.work() was called with smth
-                    verify(worker, times(1)).work(anyString(), anyString());
-                });
+        // then worker starts
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+            // ✅ Verify that worker.work() was called with smth
+            verify(worker, times(1)).work(anyString(), anyString());
+        });
     }
 
     private void imitateWorkOfProjectCreatorService() {
