@@ -1,5 +1,6 @@
 package com.annalabs.getJsWorker.worker;
 
+import com.annalabs.common.kafka.KafkaMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -11,12 +12,12 @@ import java.io.*;
 public class JsWorker {
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, KafkaMessage> kafkaTemplate;
 
     @Value("${kafka.topics.js}")
     String topic;
 
-    public void processMessage(String message) {
+    public void processMessage(String projectId, String message) {
         String fileNameInput = message + "_in.txt";
         String fileNameOutput = message + "_out.txt";
         File tempDir = new File(System.getProperty("java.io.tmpdir")); // System temp directory
@@ -54,7 +55,7 @@ public class JsWorker {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     // Send each line to another Kafka topic
-                    kafkaTemplate.send(topic, line);
+                    kafkaTemplate.send(topic, new KafkaMessage(projectId, line, "JsWorker"));
                     System.out.println("Sent to Kafka: " + line); // Debugging log
                 }
             } catch (IOException e) {
@@ -62,17 +63,6 @@ public class JsWorker {
             }
         } catch (IOException | InterruptedException e) {
             System.err.println("Error executing command: " + e.getMessage());
-        }
-    }
-
-    private void deleteFile(String filePath) {
-        File file = new File(filePath);
-        if (file.exists()) {
-            if (file.delete()) {
-                System.out.println("Deleted temp file: " + filePath);
-            } else {
-                System.err.println("Failed to delete temp file: " + filePath);
-            }
         }
     }
 }
