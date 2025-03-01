@@ -1,5 +1,6 @@
 package com.annalabs.getJsWorker.worker;
 
+import com.annalabs.common.kafka.KafkaMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,7 +27,7 @@ class JsWorkerTest {
     private final CountDownLatch latch = new CountDownLatch(1);
     @Autowired
     JsWorker jsWorker;
-    private String receivedMessage;
+    private KafkaMessage receivedMessage;
 
     @DynamicPropertySource
     static void registerKafkaProperties(DynamicPropertyRegistry registry) {
@@ -35,14 +36,14 @@ class JsWorkerTest {
 
     @Test
     void jsWorkerTest() throws InterruptedException {
-        jsWorker.processMessage("owasp.org");
+        jsWorker.processMessage("ignored","owasp.org");
         boolean messageConsumed = latch.await(2, TimeUnit.SECONDS);
         assertTrue(messageConsumed, "Message was not consumed in time");
 
     }
 
     @KafkaListener(topics = "${kafka.topics.js}", groupId = "${kafka.groups.getjs}")
-    public void listen(String message) {
+    public void listen(KafkaMessage message) {
         this.receivedMessage = message;
         latch.countDown();
     }
