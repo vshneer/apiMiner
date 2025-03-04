@@ -4,9 +4,6 @@ import com.annalabs.common.entity.ProjectEntity;
 import com.annalabs.common.entity.ScopeEntity;
 import com.annalabs.common.kafka.KafkaMessage;
 import com.annalabs.getJsWorker.worker.JsWorker;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +21,6 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
