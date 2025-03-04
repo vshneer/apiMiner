@@ -1,5 +1,6 @@
 package com.annalabs.linkFinderWorker.worker;
 
+import com.annalabs.common.kafka.KafkaMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,7 +27,7 @@ class LinkFinderTest {
     private final CountDownLatch latch = new CountDownLatch(1);
     @Autowired
     LinkFinderWorker linkFinderWorker;
-    private String receivedMessage;
+    private KafkaMessage receivedMessage;
 
     @DynamicPropertySource
     static void registerKafkaProperties(DynamicPropertyRegistry registry) {
@@ -35,14 +36,14 @@ class LinkFinderTest {
 
     @Test
     void linkFinderWorkerTest() throws InterruptedException {
-        linkFinderWorker.processMessage("https://owasp.org");
+        linkFinderWorker.processMessage("dummy-project-id","https://owasp.org");
         boolean messageConsumed = latch.await(5, TimeUnit.SECONDS);
         assertTrue(messageConsumed, "Message was not consumed in time");
 
     }
 
     @KafkaListener(topics = {"${kafka.topics.api}"}, groupId = "${kafka.groups.linkfinder}")
-    public void listen(String message) {
+    public void listen(KafkaMessage message) {
         this.receivedMessage = message;
         latch.countDown();
     }
