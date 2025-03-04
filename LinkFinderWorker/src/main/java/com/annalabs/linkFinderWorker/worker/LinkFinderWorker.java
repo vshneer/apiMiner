@@ -1,5 +1,6 @@
 package com.annalabs.linkFinderWorker.worker;
 
+import com.annalabs.common.kafka.KafkaMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -18,12 +19,12 @@ import java.util.concurrent.*;
 public class LinkFinderWorker {
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, KafkaMessage> kafkaTemplate;
 
     @Value("${kafka.topics.api}")
     private String topic;
 
-    public void processMessage(String message) {
+    public void processMessage(String projectId, String message) {
         try {
             // Build the command safely
             List<String> command = Arrays.asList("GoLinkFinder", "-d", message);
@@ -78,7 +79,7 @@ public class LinkFinderWorker {
                 }
 
                 System.out.println("Process completed successfully.");
-                outputFuture.get().forEach(result -> kafkaTemplate.send(topic, result));
+                outputFuture.get().forEach(result -> kafkaTemplate.send(topic, new KafkaMessage(projectId, result, "LinkFinderWorker")));
 
 
             } catch (TimeoutException e) {
