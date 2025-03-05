@@ -16,18 +16,21 @@ public class AssetEntity {
     @Id
     private String id;
     private String projectId;
+    private String source;
     private Date timestamp;
     private org.bson.Document content;
 
-    public AssetEntity(String projectId, org.bson.Document content) {
+    public AssetEntity(String projectId, String source, org.bson.Document content) {
         this.projectId = projectId;
+        this.source = source;
         this.content = content;
         this.timestamp = new Date();
     }
 
-    public AssetEntity(String projectId, org.bson.Document content, Date timestamp) {
+    public AssetEntity(String projectId, String source, org.bson.Document content, Date timestamp) {
         this.projectId = projectId;
         this.content = content;
+        this.source = source;
         this.timestamp = timestamp;
     }
 
