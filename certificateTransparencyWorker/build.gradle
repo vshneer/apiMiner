@@ -34,7 +34,7 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.jsoup:jsoup:1.15.4' // For HTML parsing
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.2' // For making HTTP requests
-    implementation 'com.annalabs:common:0.0.4'
+    implementation 'com.annalabs:common:0.0.7'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.16.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
     testImplementation 'org.awaitility:awaitility:4.2.0'
