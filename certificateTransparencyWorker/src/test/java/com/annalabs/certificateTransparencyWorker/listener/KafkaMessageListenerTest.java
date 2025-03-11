@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
@@ -30,6 +31,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS) // ✅ Forces a new context for this test only
 @EmbeddedKafka(partitions = 1, topics = {"project"}, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
 public class KafkaMessageListenerTest {
 
@@ -40,12 +42,7 @@ public class KafkaMessageListenerTest {
         mongoDBContainer.start();
     }
 
-    @Autowired
-    private KafkaMessageListener listener; // ✅ Spring-managed instance
-
-    @Autowired
-    private CertificateTransparencyLogWorker worker;
-
+    // ✅ This test config is now **ONLY** used in this test class
     @TestConfiguration
     static class MockConfig {
         @Bean
@@ -54,6 +51,12 @@ public class KafkaMessageListenerTest {
             return mock(CertificateTransparencyLogWorker.class);
         }
     }
+
+    @Autowired
+    private KafkaMessageListener listener; // ✅ Spring-managed instance
+
+    @Autowired
+    private CertificateTransparencyLogWorker worker;
 
     @Autowired
     private MongoTemplate mongoTemplate;
