@@ -1,9 +1,7 @@
 package com.annalabs.linkFinderWorker.worker;
 
-import com.annalabs.common.kafka.KafkaMessage;
+import com.annalabs.linkFinderWorker.writer.LinkFinderWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -19,10 +17,7 @@ import java.util.concurrent.*;
 public class LinkFinderWorker {
 
     @Autowired
-    private KafkaTemplate<String, KafkaMessage> kafkaTemplate;
-
-    @Value("${kafka.topics.api}")
-    private String topic;
+    private LinkFinderWriter writer;
 
     public void processMessage(String projectId, String message) {
         try {
@@ -79,7 +74,7 @@ public class LinkFinderWorker {
                 }
 
                 System.out.println("Process completed successfully.");
-                outputFuture.get().forEach(result -> kafkaTemplate.send(topic, new KafkaMessage(projectId, result, "LinkFinderWorker")));
+                outputFuture.get().forEach(result -> writer.persist(projectId, result));
 
 
             } catch (TimeoutException e) {
