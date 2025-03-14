@@ -1,21 +1,15 @@
 package com.annalabs.getJsWorker.worker;
 
-import com.annalabs.common.kafka.KafkaMessage;
+import com.annalabs.getJsWorker.writer.JsWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
 
 @Component
 public class JsWorker {
-
     @Autowired
-    private KafkaTemplate<String, KafkaMessage> kafkaTemplate;
-
-    @Value("${kafka.topics.js}")
-    String topic;
+    JsWriter jsWriter;
 
     public void processMessage(String projectId, String message) {
         String fileNameInput = message + "_in.txt";
@@ -54,9 +48,7 @@ public class JsWorker {
             try (BufferedReader reader = new BufferedReader(new FileReader(pathOutputFile))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // Send each line to another Kafka topic
-                    kafkaTemplate.send(topic, new KafkaMessage(projectId, line, "JsWorker"));
-                    System.out.println("Sent to Kafka: " + line); // Debugging log
+                    jsWriter.persist(projectId, line);
                 }
             } catch (IOException e) {
                 System.err.println("Error reading from output file: " + e.getMessage());

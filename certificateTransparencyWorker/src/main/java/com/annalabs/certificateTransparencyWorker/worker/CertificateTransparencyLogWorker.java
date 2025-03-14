@@ -2,9 +2,7 @@ package com.annalabs.certificateTransparencyWorker.worker;
 
 import com.annalabs.certificateTransparencyWorker.client.CrtShClient;
 import com.annalabs.certificateTransparencyWorker.writer.CertificateTransparencyLogWriter;
-import com.annalabs.common.kafka.KafkaMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

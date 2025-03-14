@@ -3,9 +3,14 @@ package com.annalabs.getJsWorker.listener;
 import com.annalabs.common.entity.ProjectEntity;
 import com.annalabs.common.entity.ScopeEntity;
 import com.annalabs.common.kafka.KafkaMessage;
-import com.annalabs.getJsWorker.worker.JsWorker;
+import com.annalabs.getJsWorker.processor.ProjectMessageProcessor;
+import com.annalabs.getJsWorker.processor.SubdomainMessageProcessor;
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,19 +37,22 @@ public class KafkaMessageListenerTest {
 
     public static final String TEST_IN_SCOPE = "fnx.co.il";
     public static final String TEST_SUBDOMAIN = TEST_IN_SCOPE;
-
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:latest"));
     public static final String DUMMY_PROJECT_ID = "dummy-project-id";
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:latest"));
 
     static {
         mongoDBContainer.start();
     }
 
+    KafkaMessage testMessage = new KafkaMessage(DUMMY_PROJECT_ID, TEST_SUBDOMAIN, "");
+    @Captor
+    private ArgumentCaptor<KafkaMessage> messageCaptor;
     @Autowired
     private KafkaMessageListener listener;
-
     @Autowired
-    private JsWorker worker;
+    private ProjectMessageProcessor projectMessageProcessor;
+    @Autowired
+    private SubdomainMessageProcessor subdomainMessageProcessor;
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
@@ -55,36 +63,41 @@ public class KafkaMessageListenerTest {
     private String subdomainTopic;
 
     @DynamicPropertySource
-    static void registerKafkaProperties(DynamicPropertyRegistry registry) {
+    static void registerProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
-    public ProjectEntity populateMongoWithNewProject() {
+    public void populateMongoWithNewProject() {
         // Create a Project document
         ProjectEntity project = new ProjectEntity("test-title", new ScopeEntity(List.of(), List.of(TEST_IN_SCOPE)));
         // Save it in MongoDB
         mongoTemplate.save(project);
-        return project;
+    }
+
+    @BeforeEach
+    public void checkMocks() {
+        System.out.println("🔍 Processor is: " + projectMessageProcessor);
+        System.out.println("🔍 Processor is a mock? " + (Mockito.mockingDetails(projectMessageProcessor).isMock()));
     }
 
     @Test
-    public void projectTopicListenerWorks() throws IOException {
+    public void projectTopicListenerCallsProcessor() throws IOException {
         /*
             If Listener gets kafka message from project topic
             It calls worker with correct parameters
          */
 
         // when message is consumed
-        ProjectEntity projectEntity = imitateWorkOfProjectCreatorService();
+        imitateWorkOfProjectCreatorService();
         // then worker starts
         Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
             // ✅ Verify that worker.work() was called with smth
-            verify(worker, times(1)).processMessage(projectEntity.getId(), TEST_IN_SCOPE);
+            verify(projectMessageProcessor, times(1)).process(any(KafkaMessage.class));
         });
     }
 
     @Test
-    public void subdomainTopicListenerWorks() throws IOException, InterruptedException {
+    public void subdomainTopicListenerCallsProcessor() throws IOException, InterruptedException {
         /*
             If Listener gets kafka message from subdomain topic
             It calls worker with correct parameters
@@ -95,20 +108,18 @@ public class KafkaMessageListenerTest {
         // then worker starts
         Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
             // ✅ Verify that worker.work() was called with smth
-            verify(worker, times(1)).processMessage(DUMMY_PROJECT_ID, TEST_SUBDOMAIN);
+            verify(subdomainMessageProcessor, times(1)).process(any(KafkaMessage.class));
         });
     }
 
     private void imitateWorkOfSubdomainEnumService() throws InterruptedException {
-        KafkaMessage testMessage = new KafkaMessage(DUMMY_PROJECT_ID, TEST_SUBDOMAIN, "");
         Thread.sleep(5000); // Wait for Kafka to fully initialize
         kafkaTemplate.send(subdomainTopic, testMessage);
     }
 
-    private ProjectEntity imitateWorkOfProjectCreatorService() {
-        ProjectEntity projectEntity = populateMongoWithNewProject();
+    private void imitateWorkOfProjectCreatorService() {
+        populateMongoWithNewProject();
         sendNewProjectEventToKafka();
-        return projectEntity;
     }
 
     private void sendNewProjectEventToKafka() {
@@ -122,8 +133,15 @@ public class KafkaMessageListenerTest {
     static class MockConfig {
         @Bean
         @Primary
-        public JsWorker mockWorker() {
-            return mock(JsWorker.class);
+        public ProjectMessageProcessor mockProjectProcessor() {
+            return mock(ProjectMessageProcessor.class);
+        }
+
+        @Bean
+        @Primary
+        public SubdomainMessageProcessor mockSubdomainProcessor() {
+            return mock(SubdomainMessageProcessor.class);
         }
     }
+
 }

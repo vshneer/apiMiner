@@ -11,12 +11,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CertificateTransparencyLogWriter {
+
     @Autowired
     MongoTemplate mongoTemplate;
-@Autowired
-private KafkaTemplate<String, KafkaMessage> kafkaTemplate;
+
+    @Autowired
+    private KafkaTemplate<String, KafkaMessage> kafkaTemplate;
+
     @Value("${kafka.topics.subdomain}")
     private String topic;
+
     public void persist(String projectId, String subdomain) {
         AssetEntity asset = new AssetEntity(projectId, "CertificateTransparencyLogWorker", new Document("subdomain", subdomain));
         mongoTemplate.insert(asset);
