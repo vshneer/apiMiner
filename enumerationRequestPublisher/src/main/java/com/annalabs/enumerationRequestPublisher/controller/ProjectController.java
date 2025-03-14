@@ -30,6 +30,7 @@ public class ProjectController {
     @PostMapping("/project")
     public PostProjectResponse createProject(@RequestBody PostProjectRequest postProjectRequest) {
         // TODO make MONGO + KAFKA transactions atomic
+        // TODO move to service + repository
         try {
             // Create a Project document
             ProjectEntity project = new ProjectEntity(postProjectRequest.getTitle(), postProjectRequest.getScope());
