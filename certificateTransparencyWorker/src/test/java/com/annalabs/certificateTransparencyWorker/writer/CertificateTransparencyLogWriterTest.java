@@ -35,7 +35,6 @@ public class CertificateTransparencyLogWriterTest {
     private final CountDownLatch latch = new CountDownLatch(1);
     @Autowired
     CertificateTransparencyLogWriter writer;
-    private KafkaMessage receivedMessage;
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -70,7 +69,6 @@ public class CertificateTransparencyLogWriterTest {
 
     @KafkaListener(topics = {"${kafka.topics.subdomain}"}, groupId = "${kafka.groups.certsh}")
     public void listen(KafkaMessage message) {
-        this.receivedMessage = message;
         latch.countDown();
     }
 }
